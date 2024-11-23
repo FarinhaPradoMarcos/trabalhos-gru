@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your AR Game</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #222;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #start-button {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 5;
+        }
+        .square {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+        }
+        #timer {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <a-scene embedded arjs>
+            <a-camera-static></a-camera-static>
+        </a-scene>
+
+        <div id="timer">Time: <span id="time">30</span>s</div>
+        <button id="start-button" disabled>Start Game</button>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const startButton = document.getElementById('start-button');
+        const timerDisplay = document.getElementById('time');
+
+        let gameInterval, countdownInterval;
+        let timeRemaining = 30;
+        let squaresOnScreen = 3;
+
+        // Enable Start Button after AR.js loads
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            startButton.disabled = false;
+            console.log('AR.js and A-Frame have loaded');
+        });
+
+        function startGame() {
+            startButton.style.display = 'none';
+            timeRemaining = 30;
+            timerDisplay.innerText = timeRemaining;
+            spawnSquares();
+
+            countdownInterval = setInterval(() => {
+                timeRemaining--;
+                timerDisplay.innerText = timeRemaining;
+                if (timeRemaining <= 0) endGame();
+            }, 1000);
+
+            gameInterval = setInterval(spawnSquares, 2000);
+        }
+
+        function spawnSquares() {
+            clearSquares();
+            for (let i = 0; i < squaresOnScreen; i++) {
+                const square = document.createElement('div');
+                square.classList.add('square');
+                square.style.top = `${Math.random() * 80 + 10}%`;
+                square.style.left = `${Math.random() * 80 + 10}%`;
+                square.onclick = () => {
+                    square.remove();
+                };
+                gameContainer.appendChild(square);
+            }
+        }
+
+        function clearSquares() {
+            document.querySelectorAll('.square').forEach(square => square.remove());
+        }
+
+        function endGame() {
+            clearInterval(countdownInterval);
+            clearInterval(gameInterval);
+            clearSquares();
+            startButton.style.display = 'block';
+            alert('Time’s up! Game over.');
+        }
+
+        startButton.addEventListener('click', startGame);
+    </script>
+</body>
+</html>
